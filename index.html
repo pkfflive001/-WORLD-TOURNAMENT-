@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>World Tournament</title>
+
+<style>
+body{background:#081328;color:white;font-family:Arial;margin:0;padding:10px}
+.card{background:#1f2937;padding:15px;margin:10px;border-radius:10px}
+button{width:100%;padding:10px;margin-top:10px;border:none}
+.join{background:#ff6b00;color:white;font-weight:bold}
+.admin{position:fixed;top:10px;right:10px;font-size:30px;cursor:pointer}
+.popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8)}
+.box{background:white;color:black;width:90%;max-width:350px;margin:100px auto;padding:15px;border-radius:10px}
+input{width:100%;padding:10px;margin-top:10px;box-sizing:border-box}
+</style>
+</head>
+
+<body>
+
+<div class="admin" onclick="login()">👑</div>
+
+<h2>🌍 WORLD TOURNAMENT</h2>
+
+<h3>💰 Balance: <span id="bal">0</span></h3>
+
+<div id="matches"></div>
+
+<div id="adminPanel" style="display:none" class="card">
+
+<h3>🏆 Admin Panel</h3>
+
+<input id="tname" placeholder="Tournament Name">
+<input id="roomid" placeholder="Room ID">
+<input id="roompass" placeholder="Room Password">
+<input id="time" placeholder="Date & Time">
+
+<button class="join" onclick="addMatch()">Publish Tournament</button>
+
+<h3>💰 Requests</h3>
+<div id="requests"></div>
+
+</div>
+
+<!-- PAYMENT POPUP -->
+<div class="popup" id="popup">
+<div class="box">
+
+<h3>💰 Add Balance Request</h3>
+
+<p>JazzCash: <b>03245150474</b></p>
+
+<input id="sender" placeholder="Sender Name">
+<input id="amount" placeholder="Amount">
+
+<button class="join" onclick="send()">Submit Request</button>
+
+</div>
+</div>
+
+<script>
+
+let balance = 0;
+let requests = [];
+let tournament = null;
+
+function updateBalance(){
+document.getElementById("bal").innerText = balance;
+}
+
+// 👑 ADMIN LOGIN
+function login(){
+let p = prompt("Enter Password");
+if(p=="adminhelp"){
+document.getElementById("adminPanel").style.display="block";
+}
+}
+
+// 🏆 CREATE TOURNAMENT
+function addMatch(){
+
+tournament = {
+name: tname.value,
+roomid: roomid.value,
+roompass: roompass.value,
+time: time.value
+};
+
+document.getElementById("matches").innerHTML = `
+<div class="card">
+
+<h3>🔥 ${tournament.name}</h3>
+<p>⏰ ${tournament.time}</p>
+
+<button class="join" onclick="joinMatch()">
+🎮 JOIN MATCH
+</button>
+
+</div>`;
+
+alert("Tournament Published");
+}
+
+// 🎮 JOIN MATCH
+function joinMatch(){
+
+if(balance < 20){
+document.getElementById("popup").style.display="block";
+return;
+}
+
+// cut balance
+balance -= 20;
+updateBalance();
+
+alert(
+"🎮 JOIN SUCCESSFULL\n\nROOM ID: " + tournament.roomid +
+"\nPASSWORD: " + tournament.roompass
+);
+}
+
+// 💰 SEND REQUEST (NO AUTO BALANCE)
+function send(){
+
+requests.push({
+sender: sender.value,
+amount: Number(amount.value),
+status: "pending"
+});
+
+renderRequests();
+
+alert("Request Sent To Admin");
+
+document.getElementById("popup").style.display="none";
+}
+
+// 📌 ADMIN REQUEST PANEL
+function renderRequests(){
+
+let html="";
+
+requests.forEach((r,i)=>{
+
+html += `
+<div class="card">
+
+<b>👤 ${r.sender}</b><br>
+💰 ${r.amount}<br>
+📌 ${r.status}
+
+<button onclick="approve(${i})">✔ Approve</button>
+<button onclick="reject(${i})">❌ Reject</button>
+
+</div>
+`;
+});
+
+document.getElementById("requests").innerHTML = html;
+}
+
+// ✔ APPROVE (ONLY HERE BALANCE ADDS)
+function approve(i){
+
+requests[i].status="approved";
+
+balance += requests[i].amount;
+
+updateBalance();
+renderRequests();
+
+alert("Approved + Balance Added");
+}
+
+// ❌ REJECT
+function reject(i){
+
+requests[i].status="rejected";
+renderRequests();
+
+alert("Rejected");
+}
+
+updateBalance();
+
+</script>
+
+</body>
+</html>
